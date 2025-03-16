@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -159,5 +158,81 @@
   .animate-on-scroll.is-visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /* Project Title Glitch Effect */
+  .project-title-glitch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .project-title-glitch:hover::before,
+  .project-title-glitch:hover::after {
+    content: attr(data-content);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    background: inherit;
+    mix-blend-mode: difference;
+  }
+
+  .project-title-glitch:hover::after {
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    animation: glitch 0.5s infinite alternate-reverse;
+  }
+
+  @keyframes glitch {
+    0% {
+      transform: translate(-2px, 0);
+    }
+    25% {
+      transform: translate(2px, 2px);
+    }
+    50% {
+      transform: translate(-1px, -1px);
+    }
+    75% {
+      transform: translate(1px, -2px);
+    }
+    100% {
+      transform: translate(2px, 2px);
+    }
+  }
+
+  /* 3D card effect */
+  .tilt-card {
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+  }
+
+  .tilt-card-content {
+    transform: translateZ(50px);
+  }
+
+  /* Parallax layers */
+  .parallax-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+  }
+
+  .parallax-bg-1 {
+    transform: translateZ(-100px) scale(1.5);
+  }
+
+  .parallax-bg-2 {
+    transform: translateZ(-50px) scale(1.25);
+  }
+
+  .parallax-content {
+    transform: translateZ(0);
+    position: relative;
+    z-index: 1;
   }
 }

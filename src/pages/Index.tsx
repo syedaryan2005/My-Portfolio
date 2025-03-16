@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
@@ -9,7 +9,16 @@ import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
 const Index = () => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+
   useEffect(() => {
+    // Track scroll position
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
     // Intersection Observer for scroll animations
     const observerOptions = {
       root: null,
@@ -33,12 +42,18 @@ const Index = () => {
     });
 
     return () => {
+      window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
     };
   }, []);
 
+  // Dynamically calculate CSS properties based on scroll position for parallax effect
+  const dynamicStyle = {
+    '--scroll-position': scrollPosition + 'px',
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={dynamicStyle}>
       <Navbar />
       <Hero />
       <About />
