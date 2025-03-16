@@ -30,7 +30,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
     glareEnable: true,
     glareMaxOpacity: 0.15,
     glareColor: "#ffffff",
-    glarePosition: "all",
+    glarePosition: "all" as const, // Type assertion to make sure it matches GlarePosition
     glareBorderRadius: "12px"
   };
 
