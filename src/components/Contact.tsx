@@ -1,6 +1,6 @@
-
 import { useState, useRef, useEffect } from 'react';
-import { Send, CheckCircle } from 'lucide-react';
+import { Send, CheckCircle, MailIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Contact = () => {
   const [name, setName] = useState('');
@@ -9,8 +9,10 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const { toast } = useToast();
   
   const sectionRef = useRef<HTMLElement>(null);
+  const recipientEmail = 'syedaryana869@gmail.com';
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -53,9 +55,29 @@ const Contact = () => {
     setError('');
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Create email body using template literals for formatting
+      const mailtoBody = `
+        Name: ${name}
+        Email: ${email}
+        
+        Message:
+        ${message}
+      `;
+      
+      // Encode the email content for mailto link
+      const encodedBody = encodeURIComponent(mailtoBody);
+      const mailtoLink = `mailto:${recipientEmail}?subject=Portfolio Contact from ${encodeURIComponent(name)}&body=${encodedBody}`;
+      
+      // Open email client
+      window.open(mailtoLink, '_blank');
+      
+      // Show success message using toast
+      toast({
+        title: "Message prepared!",
+        description: "Your email client has been opened with the message. Please send it to complete.",
+      });
+      
       setIsSubmitted(true);
       setName('');
       setEmail('');
@@ -65,7 +87,16 @@ const Contact = () => {
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or contact directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,6 +115,9 @@ const Contact = () => {
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto animate-on-scroll">
             Have a project in mind or want to discuss opportunities? I'd love to hear from you.
+            <span className="block mt-2 text-sm font-medium">
+              <MailIcon className="inline-block w-4 h-4 mr-1" /> {recipientEmail}
+            </span>
           </p>
         </div>
         
