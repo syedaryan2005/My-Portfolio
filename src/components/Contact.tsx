@@ -1,6 +1,10 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Send, CheckCircle, MailIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 const Contact = () => {
   const [name, setName] = useState('');
@@ -56,26 +60,30 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Create email body using template literals for formatting
-      const mailtoBody = `
-        Name: ${name}
-        Email: ${email}
-        
-        Message:
-        ${message}
-      `;
+      // Create a FormData object
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('message', message);
+      formData.append('recipient', recipientEmail);
       
-      // Encode the email content for mailto link
-      const encodedBody = encodeURIComponent(mailtoBody);
-      const mailtoLink = `mailto:${recipientEmail}?subject=Portfolio Contact from ${encodeURIComponent(name)}&body=${encodedBody}`;
+      // Send the form data using Web API
+      const response = await fetch('https://formsubmit.co/' + recipientEmail, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
       
-      // Open email client
-      window.open(mailtoLink, '_blank');
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
       
-      // Show success message using toast
+      // Show success message
       toast({
-        title: "Message prepared!",
-        description: "Your email client has been opened with the message. Please send it to complete.",
+        title: "Message sent successfully!",
+        description: "Thank you for reaching out. I'll get back to you soon.",
       });
       
       setIsSubmitted(true);
@@ -91,7 +99,7 @@ const Contact = () => {
       console.error('Error sending email:', error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again or contact directly.",
+        description: "Failed to send message. Please try again or contact me directly.",
         variant: "destructive",
       });
     } finally {
@@ -134,7 +142,14 @@ const Contact = () => {
             <form 
               onSubmit={handleSubmit} 
               className="space-y-6 animate-on-scroll"
+              action="https://formsubmit.co/{recipientEmail}" 
+              method="POST"
             >
+              {/* Hidden fields for FormSubmit.co */}
+              <input type="hidden" name="_subject" value="New portfolio contact message" />
+              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_next" value={window.location.href} />
+              
               <div>
                 <label 
                   htmlFor="name" 
@@ -142,8 +157,9 @@ const Contact = () => {
                 >
                   Your Name
                 </label>
-                <input
+                <Input
                   id="name"
+                  name="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -159,8 +175,9 @@ const Contact = () => {
                 >
                   Your Email
                 </label>
-                <input
+                <Input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -176,21 +193,22 @@ const Contact = () => {
                 >
                   Your Message
                 </label>
-                <textarea
+                <Textarea
                   id="message"
+                  name="message"
                   rows={5}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all duration-300 resize-none"
                   placeholder="I'm interested in working with you on..."
-                ></textarea>
+                ></Textarea>
               </div>
               
               {error && (
                 <p className="text-red-500 text-sm">{error}</p>
               )}
               
-              <button
+              <Button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-300 flex items-center justify-center"
@@ -202,7 +220,7 @@ const Contact = () => {
                     Send Message <Send size={16} className="ml-2" />
                   </>
                 )}
-              </button>
+              </Button>
             </form>
           )}
         </div>
