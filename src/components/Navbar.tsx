@@ -1,90 +1,69 @@
-
-import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import AnimatedText from './AnimatedText';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  const handleScroll = () => {
-    if (window.scrollY > 10) {
-      setIsScrolled(true);
-    } else {
-      setIsScrolled(false);
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+      setIsMenuOpen(false);
     }
   };
-
-  const scrollToSection = (sectionId: string) => {
-    setIsMenuOpen(false);
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out',
-        isScrolled 
-          ? 'py-3 bg-white/80 backdrop-blur-md shadow-sm'
-          : 'py-5 bg-transparent'
+        'fixed top-0 left-0 w-full z-[100] transition-all duration-300 ease-in-out backdrop-blur-md bg-white/70 shadow-lg',
       )}
     >
-      <div className="container flex items-center justify-between">
+      <div className="container flex items-center justify-between py-3">
         <a 
           href="#" 
-          className="text-xl font-display font-bold tracking-tight text-gradient"
+          className="text-2xl font-display font-bold tracking-tight text-gradient drop-shadow-sm flex items-center h-10 relative z-50"
         >
-          Aryan Shah
+          <AnimatedText
+            texts={['Syed Aryan Ali Shah']}
+            className="text-gradient font-bold"
+          />
         </a>
-
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-8">
           {['about', 'projects', 'skills', 'contact'].map((item) => (
             <button
               key={item}
               onClick={() => scrollToSection(item)}
-              className="hover-link text-sm font-medium capitalize"
+              className="hover-link text-base font-medium capitalize px-2 py-1 rounded transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {item}
             </button>
           ))}
         </nav>
-
         {/* Mobile Menu Button */}
         <button
-          className="p-2 md:hidden text-foreground"
-          onClick={toggleMenu}
+          className="p-2 md:hidden text-foreground relative z-50"
+          onClick={() => setIsMenuOpen((v) => !v)}
           aria-label="Toggle menu"
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
-
       {/* Mobile Navigation */}
       <div
         className={cn(
-          'fixed inset-0 bg-white z-40 transition-transform duration-300 ease-in-out md:hidden',
-          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          'fixed inset-0 top-0 bg-white/95 z-40 transition-all duration-300 ease-in-out md:hidden backdrop-blur-lg',
+          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         )}
       >
-        <div className="container flex flex-col items-center justify-center h-full space-y-8">
+        <div className="container flex flex-col items-center justify-center min-h-screen pt-24">
           {['about', 'projects', 'skills', 'contact'].map((item) => (
             <button
               key={item}
               onClick={() => scrollToSection(item)}
-              className="text-2xl font-medium capitalize"
+              className="text-2xl font-semibold capitalize text-gradient px-4 py-4 rounded hover:bg-primary/10 transition-colors w-full text-center"
             >
               {item}
             </button>

@@ -1,27 +1,23 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Send, CheckCircle, MailIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const { toast } = useToast();
-  
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const recipientEmail = 'syedaryana869@gmail.com';
+  const form = useRef();
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -34,77 +30,44 @@ const Contact = () => {
       },
       { threshold: 0.1 }
     );
-
     observer.observe(section);
-
     return () => {
       if (section) observer.unobserve(section);
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Simple form validation
+  // Simple client-side validation before submit
+  const validateForm = () => {
     if (!name || !email || !message) {
       setError('Please fill in all fields.');
-      return;
+      return false;
     }
-    
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       setError('Please enter a valid email address.');
-      return;
+      return false;
     }
-    
     setError('');
-    setIsSubmitting(true);
-    
-    try {
-      // Create a FormData object
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('email', email);
-      formData.append('message', message);
-      formData.append('recipient', recipientEmail);
-      
-      // Send the form data using Web API
-      const response = await fetch('https://formsubmit.co/' + recipientEmail, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to send message');
+    return true;
+  };
+
+  const sendEmail = (e) => {
+    e.preventDefault();
+
+    emailjs.sendForm(
+      'service_djht6vc',
+      'template_22jlmfn',
+      form.current,
+      '86vEtTAwxHdBYT2rX'
+    )
+    .then(
+      (result) => {
+        setIsSubmitted(true);
+        setError('');
+      },
+      (error) => {
+        setError('Failed to send message. Please try again later.');
       }
-      
-      // Show success message
-      toast({
-        title: "Message sent successfully!",
-        description: "Thank you for reaching out. I'll get back to you soon.",
-      });
-      
-      setIsSubmitted(true);
-      setName('');
-      setEmail('');
-      setMessage('');
-      
-      // Reset success message after some time
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 5000);
-    } catch (error) {
-      console.error('Error sending email:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again or contact me directly.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    );
   };
 
   return (
@@ -128,7 +91,6 @@ const Contact = () => {
             </span>
           </p>
         </div>
-        
         <div className="max-w-2xl mx-auto">
           {isSubmitted ? (
             <div className="text-center p-8 rounded-2xl border border-green-200 bg-green-50 animate-fade-in">
@@ -139,87 +101,57 @@ const Contact = () => {
               </p>
             </div>
           ) : (
-            <form 
-              onSubmit={handleSubmit} 
+            <form
+              ref={form}
+              onSubmit={sendEmail}
               className="space-y-6 animate-on-scroll"
-              action="https://formsubmit.co/{recipientEmail}" 
-              method="POST"
             >
               {/* Hidden fields for FormSubmit.co */}
               <input type="hidden" name="_subject" value="New portfolio contact message" />
               <input type="hidden" name="_captcha" value="false" />
               <input type="hidden" name="_next" value={window.location.href} />
-              
               <div>
-                <label 
-                  htmlFor="name" 
-                  className="block text-sm font-medium mb-2"
-                >
-                  Your Name
-                </label>
+                <label htmlFor="name" className="block text-sm font-medium mb-2">Your Name</label>
                 <Input
                   id="name"
                   name="name"
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all duration-300"
                   placeholder="John Doe"
                 />
               </div>
-              
               <div>
-                <label 
-                  htmlFor="email" 
-                  className="block text-sm font-medium mb-2"
-                >
-                  Your Email
-                </label>
+                <label htmlFor="email" className="block text-sm font-medium mb-2">Your Email</label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all duration-300"
                   placeholder="john@example.com"
                 />
               </div>
-              
               <div>
-                <label 
-                  htmlFor="message" 
-                  className="block text-sm font-medium mb-2"
-                >
-                  Your Message
-                </label>
+                <label htmlFor="message" className="block text-sm font-medium mb-2">Your Message</label>
                 <Textarea
                   id="message"
                   name="message"
                   rows={5}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={e => setMessage(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all duration-300 resize-none"
                   placeholder="I'm interested in working with you on..."
                 ></Textarea>
               </div>
-              
-              {error && (
-                <p className="text-red-500 text-sm">{error}</p>
-              )}
-              
+              {error && <p className="text-red-500 text-sm">{error}</p>}
               <Button
                 type="submit"
-                disabled={isSubmitting}
                 className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-300 flex items-center justify-center"
               >
-                {isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <>
-                    Send Message <Send size={16} className="ml-2" />
-                  </>
-                )}
+                Send Message <Send size={16} className="ml-2" />
               </Button>
             </form>
           )}

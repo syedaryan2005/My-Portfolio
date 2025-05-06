@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
@@ -53,7 +52,12 @@ const Index = () => {
   } as React.CSSProperties;
 
   return (
-    <div className="min-h-screen bg-background" style={dynamicStyle}>
+    <div className="min-h-screen bg-background relative" style={dynamicStyle}>
+      <div className="animated-bg">
+        <div className="animated-blob animated-blob-1"></div>
+        <div className="animated-blob animated-blob-2"></div>
+        <div className="animated-blob animated-blob-3"></div>
+      </div>
       <Navbar />
       <Hero />
       <About />

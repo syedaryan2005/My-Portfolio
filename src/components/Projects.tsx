@@ -1,91 +1,67 @@
-
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { projects } from '@/lib/data';
 import ProjectCard from './ProjectCard';
 
 const Projects = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
+  
+  const categories = [
+    { id: 'all', label: 'All Projects' },
+    { id: 'web', label: 'Web Development' },
+    { id: 'mobile', label: 'Mobile Apps' },
+    { id: 'design', label: 'UI/UX Design' }
+  ];
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            section.querySelectorAll('.animate-on-scroll').forEach((el) => {
-              el.classList.add('is-visible');
-            });
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(section);
-
-    // Parallax scroll effect
-    const handleScroll = () => {
-      setScrollPosition(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      if (section) observer.unobserve(section);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+  const filteredProjects = activeFilter === 'all'
+    ? projects
+    : projects.filter(project => project.category === activeFilter);
 
   return (
-    <section 
-      id="projects" 
-      ref={sectionRef}
-      className="py-24 sm:py-32 relative overflow-hidden"
-    >
-      {/* Parallax background layers */}
-      <div 
-        className="parallax-bg parallax-bg-1" 
-        style={{ 
-          background: 'radial-gradient(circle at 50% 50%, rgba(120, 120, 120, 0.03) 0%, rgba(0, 0, 0, 0) 70%)',
-          transform: `translateY(${scrollPosition * 0.05}px) translateZ(-100px) scale(1.5)`
-        }}
-      ></div>
-      <div 
-        className="parallax-bg parallax-bg-2" 
-        style={{ 
-          background: 'radial-gradient(circle at 80% 20%, rgba(200, 200, 200, 0.05) 0%, rgba(0, 0, 0, 0) 50%)',
-          transform: `translateY(${scrollPosition * 0.08}px) translateZ(-50px) scale(1.25)`
-        }}
-      ></div>
-
-      <div className="container max-w-6xl px-4 relative parallax-content">
-        <div className="text-center mb-16">
-          <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-primary/5 mb-3 animate-on-scroll">
+    <section id="projects" className="section bg-white">
+      <div className="container max-w-6xl px-4">
+        <div className="text-center mb-12">
+          <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-[#007BFF]/10 text-[#007BFF] mb-3">
             My Work
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-on-scroll">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Featured Projects
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto animate-on-scroll">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             A selection of my recent web development projects
           </p>
         </div>
+
+        {/* Filter buttons */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setActiveFilter(category.id)}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+                activeFilter === category.id
+                  ? 'bg-[#007BFF] text-white shadow-lg'
+                  : 'bg-[#007BFF]/5 text-foreground hover:bg-[#007BFF]/10'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
+        {/* Projects grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />
           ))}
         </div>
-
-        <div className="text-center mt-12 animate-on-scroll">
+        
+        <div className="text-center mt-12">
           <a 
             href="https://github.com/" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-full font-medium border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:bg-primary/5"
+            className="inline-flex items-center px-6 py-3 rounded-lg bg-[#007BFF] text-white font-medium 
+                     hover:bg-[#0056b3] transition-all duration-300 hover:shadow-lg transform hover:scale-105"
           >
             View More Projects
           </a>

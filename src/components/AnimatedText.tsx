@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedTextProps {
@@ -47,9 +46,9 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ texts, className = '' }) =>
   }, [displayText, isDeleting, currentIndex, texts]);
 
   return (
-    <span className={`inline-block relative ${className}`}>
+    <span className={`inline-block relative break-words ${className}`}>
       {displayText}
-      <span className="inline-block w-0.5 h-6 ml-1 bg-primary animate-pulse" aria-hidden="true"></span>
+      <span className="inline-block w-0.5 h-[1em] ml-0.5 bg-primary animate-pulse" aria-hidden="true"></span>
     </span>
   );
 };
